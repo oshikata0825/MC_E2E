@@ -1,0 +1,32 @@
+<div class="IPFormControlOuter col-xs-4 col-sm-4 col-md-4 col-lg-4    " data-content="">
+    <div class="IPLabelText FormControlTitle">
+        <span id="lblUsageCheckResult_TTM"><a href="javascript:window.top.open('/tools/decisiontree/fmddecisiontreeQUESTIONNAIRE.aspx?category=SOR&amp;Tree=e4e62639-b320-4eb9-ad62-54d3477bb565&amp;data=A9C1EC90-F50E-48B8-BD7F-776F48D81E69', '_blank');void(0);">UsageCheckResult</a></span>
+    </div><div class="select2-container IPSelect2" id="s2id_drpUsageCheckResult_TTM"><span onclick="return false;" class="select2-choice" tabindex="-1">   <span class="select2-chosen">Please make a selection...</span><abbr class="select2-search-choice-close"></abbr>   <span class="select2-arrow"><b></b></span></span><input class="select2-focusser select2-offscreen" type="text" id="s2id_autogen153"><div class="select2-drop select2-display-none select2-with-searchbox">   <div class="select2-search">       <input type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="select2-input">   </div>   <ul class="select2-results">   </ul></div></div><select name="ctl00$MainContent$tabs$tabExportHeader$pnlControl_TTM$drpUsageCheckResult_TTM" id="drpUsageCheckResult_TTM" class="IPSelect2 select2-offscreen" aria-label="UsageCheckResult" tabindex="-1">
+        <option selected="selected" value="">Please make a selection...</option>
+        <option value="1">1-未実施</option>
+        <option value="2">2-懸念なし</option>
+        <option value="3">3-懸念あり</option>
+    </select>
+</div>
+
+<div class="IPFormControlOuter col-xs-4 col-sm-4 col-md-4 col-lg-4    " data-content="">
+    <div class="IPLabelText FormControlTitle">
+        <span id="lblEndUserCheckResult_TTM"><a href="javascript:window.top.open('/tools/decisiontree/fmddecisiontreeQUESTIONNAIRE.aspx?category=EUR&amp;Tree=7dad4981-2e67-4d61-a7c1-fe3c3020aaf3&amp;data=A9C1EC90-F50E-48B8-BD7F-776F48D81E69', '_blank');void(0);">EndUserCheckResult</a></span>
+    </div><div class="select2-container IPSelect2" id="s2id_drpEndUserCheckResult_TTM"><span onclick="return false;" class="select2-choice" tabindex="-1">   <span class="select2-chosen">Please make a selection...</span><abbr class="select2-search-choice-close"></abbr>   <span class="select2-arrow"><b></b></span></span><input class="select2-focusser select2-offscreen" type="text" id="s2id_autogen154"><div class="select2-drop select2-display-none select2-with-searchbox">   <div class="select2-search">       <input type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="select2-input">   </div>   <ul class="select2-results">   </ul></div></div><select name="ctl00$MainContent$tabs$tabExportHeader$pnlControl_TTM$drpEndUserCheckResult_TTM" id="drpEndUserCheckResult_TTM" class="IPSelect2 select2-offscreen" aria-label="EndUserCheckResult" tabindex="-1">
+        <option selected="selected" value="">Please make a selection...</option>
+        <option value="1">1-未実施</option>
+        <option value="2">2-懸念なし</option>
+        <option value="3">3-懸念あり</option>
+    </select>
+</div>
+
+<div class="IPFormControlOuter col-xs-4 col-sm-4 col-md-4 col-lg-4    " data-content="">
+    <div class="IPLabelText FormControlTitle">
+        <span id="lblGuidelineResult_TTM"><a href="javascript:window.top.open('/tools/decisiontree/fmddecisiontreeQUESTIONNAIRE.aspx?category=SOR&amp;Tree=cf0d7856-b5e3-4025-b87a-5acb5dc4a24f&amp;data=A9C1EC90-F50E-48B8-BD7F-776F48D81E69', '_blank');void(0);">GuidelineResult</a></span>
+    </div><div class="select2-container IPSelect2" id="s2id_drpGuidelineResult_TTM"><span onclick="return false;" class="select2-choice" tabindex="-1">   <span class="select2-chosen">Please make a selection...</span><abbr class="select2-search-choice-close"></abbr>   <span class="select2-arrow"><b></b></span></span><input class="select2-focusser select2-offscreen" type="text" id="s2id_autogen155"><div class="select2-drop select2-display-none select2-with-searchbox">   <div class="select2-search">       <input type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="select2-input">   </div>   <ul class="select2-results">   </ul></div></div><select name="ctl00$MainContent$tabs$tabExportHeader$pnlControl_TTM$drpGuidelineResult_TTM" id="drpGuidelineResult_TTM" class="IPSelect2 select2-offscreen" aria-label="GuidelineResult" tabindex="-1">
+        <option selected="selected" value="">Please make a selection...</option>
+        <option value="1">1-未実施</option>
+        <option value="2">2-懸念なし</option>
+        <option value="3">3-懸念あり</option>
+    </select>
+</div>

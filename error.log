@@ -1,0 +1,164 @@
+Running 1 test using 1 worker
+[Google Chrome] › tests\E2E_001.test.ts:3:5 › E2E_001: Login and Navigate to GC Search/Reporting Lookup
+Navigated to GC Search/Reporting Lookup.
+Searching for Status filter...
+Attempt 1: Checking 5 frames...
+Checking frame: https://ogt-gtm-web-eu-imp.7166.aws.thomsonreuters.com/gtm/aspx?href=%2FMaintenance%2FfmgProductLookup.aspx%3FProduct%3DGlobal%2520Classification%26Category%3DSearch%2FReporting
+Checking frame: https://ogt-gtm-web-eu-imp.7166.aws.thomsonreuters.com/AppBridge.aspx
+Checking frame: https://westthomson.demdex.net/dest5.html?d_nsid=0#https%3A%2F%2Fogt-gtm-web-eu-imp.7166.aws.thomsonreuters.com
+Checking frame: https://ogt-gtm-web-eu-imp.7166.aws.thomsonreuters.com/Maintenance/fmgProductLookup.aspx?Product=Global%20Classification&Category=Search/Reporting&AngularMode
+Found filter in frame: https://ogt-gtm-web-eu-imp.7166.aws.thomsonreuters.com/Maintenance/fmgProductLookup.aspx?Product=Global%20Classification&Category=Search/Reporting&AngularMode
+Current filter selection: All
+Clicking "All" container to open dropdown...
+Selected "Approved-承認済み". Waiting for grid to update...
+Extracting Product Numbers from the updated table...
+Extracting Product Numbers from column index: 0
+Found 7 rows. Will attempt to extract 1 random product(s)...
+Extracted Product Numbers: [ 'OSGT_T00000040' ]
+--- Starting Part 2: DPS Search/Reporting Lookup ---
+Clicking DPS menu button...
+Navigated to DPS Search/Reporting Lookup.
+Searching for DPS data table...
+Found DPS data table in frame: https://ogt-gtm-web-eu-imp.7166.aws.thomsonreuters.com/Maintenance/fmgProductLookup.aspx?Product=DPS&Category=Search/Reporting&AngularMode
+Scanning 25 rows for up to 2 random CompanyID(s)...
+Found match: CompanyID=SS-Uplaod-XHWN0MPS, InternalJudgement="5-誤検知"
+Found match: CompanyID=SS-Uplaod-U5B84E2I, InternalJudgement="5-誤検知"
+Extracted CompanyIDs: [ 'SS-Uplaod-XHWN0MPS', 'SS-Uplaod-U5B84E2I' ]
+--- Starting Part 3: Create New Sales Order ---
+Clicking Export menu button...
+Navigated to Create New Sales Order.
+Searching for Sales Order form...
+Found Sales Order form in frame: https://ogt-gtm-web-eu-imp.7166.aws.thomsonreuters.com/Tools/DecisionTree/fmdDecisionTreeQuestionnaire.aspx?category=SOR&tree=ceba60f1-498e-4a46-88ce-fdf1879a21d7&AngularMode
+Clicking Sales Order dropdown...
+Selected "01-個別".
+Clicking Submit...
+Submitted Sales Order form. Waiting for update...
+--- Starting Second Selection: 01-仲介貿易 ---
+Found Sales Order form (Step 2) in frame: https://ogt-gtm-web-eu-imp.7166.aws.thomsonreuters.com/Tools/DecisionTree/fmdDecisionTreeQuestionnaire.aspx?category=SOR&tree=ceba60f1-498e-4a46-88ce-fdf1879a21d7&AngularMode
+Found label: 2. 取引の種類を選んでください
+Visible dropdowns found: 2
+Selecting the second visible dropdown (assuming order 1 -> 2)
+Target dropdown text: "- select one -"
+Selected "01-仲介貿易".
+Clicking Submit (2nd time)...
+Submitted second form.
+--- Starting Third Selection: 01-配慮国向け取引 ---
+Found label: 3.配慮国/軍・国防省向けの取引ですか？
+Visible dropdowns found (Step 3): 3
+Selecting the third visible dropdown
+Target dropdown 3 text: "- select one -"
+Selected "01-配慮国向け取引".
+Clicking Submit (3rd time)...
+Submitted third form.
+--- Starting Simultaneous Selections: X, X1, 001 ---
+Processing Q4: グループ組織コードを入力してください
+Dropdown 4 found: 1
+Selected "X" for Group Org Code.
+Processing Q5: 本部組織コードを入力してください
+Selected "X1" for Division Org Code.
+Processing Q6: BUコードを入力してください
+Selected "001" for BU Code.
+Clicking Intermediate Submit...
+Waiting for completion message...
+Verified message: "No more questions, questionnaire completed."
+Clicking Final Submit (Complete)...
+Clicked Final Submit. Waiting for confirmation dialog...
+Searching for OK button in all frames...
+Attempt 1: Checking 4 frames for OK button...
+Found visible OK button in frame: https://ogt-gtm-web-eu-imp.7166.aws.thomsonreuters.com/Tools/DecisionTree/fmdDecisionTreeQuestionnaire.aspx?category=SOR&tree=ceba60f1-498e-4a46-88ce-fdf1879a21d7&AngularMode
+Clicked OK on confirmation dialog.
+Extracted Response Code: 01010100
+--- Final Step: Go To Shipment Page ---
+Searching for "Go To Shipment Page" link...
+Found link in frame https://ogt-gtm-web-eu-imp.7166.aws.thomsonreuters.com/Tools/DecisionTree/fmdDecisionTreeQuestionnaire.aspx?category=SOR&tree=ceba60f1-498e-4a46-88ce-fdf1879a21d7&AngularMode on attempt 1.
+Successfully located "Go To Shipment Page" link.
+Navigated to Shipment Page: https://ogt-gtm-web-eu-imp.7166.aws.thomsonreuters.com/Export/fidExportCISLI.aspx?TYPE=S&ExportGuid=44107949-E825-4CE6-9C6E-B84ED69A0B2E
+--- Interacting with Shipment Page ---
+Shipment Page frame scan attempt 1...
+Shipment Page frame scan attempt 2...
+Found "Save and Validate" button in frame: https://ogt-gtm-web-eu-imp.7166.aws.thomsonreuters.com/Export/fidExportCISLI.aspx?TYPE=S&ExportGuid=44107949-E825-4CE6-9C6E-B84ED69A0B2E&AngularMode
+Clicking "Save and Validate"...
+"Save and Validate" clicked.
+Waiting for "System Messages" tab...
+Clicking "System Messages" tab...
+"System Messages" tab clicked.
+Clicking "Expand group" button...
+"Expand group" button clicked.
+Checking for system messages...
+Found 7 system message(s):
+- Date: 2026-02-02 01:18, Message: Detail -品目詳細がないため、データを追加してください。/Detail - Here is no detail data. Please add the product detail.
+- Date: 2026-02-02 01:18, Message: Header - 取引審査結果は必須入力項目です。有効な値を入力してください。/Header - Judgement is mandatory. Please fill in the valid info
+- Date: 2026-02-02 01:18, Message: Header - インフォーム要件該非が入力されていません。/Header - InformRequirementDetermination is Blank.
+- Date: 2026-02-02 01:18, Message: Header - 最終用途および使用場所が入力されていません。/EndUseDestination is Blank.
+- Date: 2026-02-02 01:18, Message: Header - 明らかガイドライン確認結果が入力されていません。審査票に回答し、この項目の結果を更新してください。/Header - GuidelineResult is blank. Please submit the Questionnaire and Update this column result.
+- Date: 2026-02-02 01:18, Message: Header - 需要者チェックリスト確認結果が入力されていません。審査票に回答し、この項目の結果を更新してください。/Header - EndUserCheckResult is blank. Please submit the Questionnaire and Update this column result.
+- Date: 2026-02-02 01:18, Message: Header - 用途チェックリスト確認結果が入力されていません。審査票に回答し、この項目の結果を更新してください。/Header - EndUserCheckResult is blank. Please submit the Questionnaire and Update this column result
+--- Starting to add 1 products to the shipment ---
+Navigating to "Details" tab...
+"Details" tab clicked.
+--- Adding product: OSGT_T00000040 ---
+"Add New Record" clicked.
+Searching for the "Add Product" modal frame...
+Add Product frame scan attempt 1...
+Add Product frame scan attempt 2...
+Add Product frame scan attempt 3...
+Found "Add Product" modal frame: https://ogt-gtm-web-eu-imp.7166.aws.thomsonreuters.com/Export/Windows/EditDetail.aspx?RT=S&T=Detail&EG=44107949-E825-4CE6-9C6E-B84ED69A0B2E&P=N&F=&ST=H&S=&IC=&EC=JP&TXN=EXPORT&LT=P&GN=EORM4O3RE2lPlpYRWNE1j6GsGeDIJppFTsgDxEwqD9vbQyPden9sOWv50bT7fn6yZBnTJ5UmeQ%2BJamLtl%2FuG15A%3D&EDG=
+Typing product number "OSGT_T00000040" character by character into the search input...
+Product number entered. Waiting for autocomplete suggestion to appear...
+Autocomplete suggestion is visible.
+Pressing ArrowDown and Enter to select the the suggestion...
+Successfully selected "OSGT_T00000040" via keyboard.
+Clicking "Save and Close"...
+Waiting for "Add Product" modal to close...
+Product OSGT_T00000040 added and modal closed.
+Waiting for product "OSGT_T00000040" to appear in the grid...
+Product "OSGT_T00000040" found in the grid.
+--- Finished adding all products ---
+--- Starting to add 2 customer(s) ---
+Navigating to "Parties" tab...
+"Parties" tab clicked.
+--- Entering customer: "SS-Uplaod-XHWN0MPS" into tab: "Customer (Seller)" ---
+Sub-tab "Customer (Seller)" clicked.
+Company ID "SS-Uplaod-XHWN0MPS" typed. Waiting for autocomplete...
+Autocomplete dropdown is visible.
+Suggestion item found.
+Autocomplete dropdown has closed, selection is likely complete.
+--- Entering customer: "SS-Uplaod-U5B84E2I" into tab: "EndUser (ShipFrom)" ---
+Sub-tab "EndUser (ShipFrom)" clicked.
+Company ID "SS-Uplaod-U5B84E2I" typed. Waiting for autocomplete...
+Autocomplete dropdown is visible.
+Suggestion item found.
+Autocomplete dropdown has closed, selection is likely complete.
+--- Finished adding all customers ---
+--- Re-validating after adding all parties ---
+Clicking "Save and Validate" again...
+"Save and Validate" clicked.
+Waiting for and clicking "System Messages" tab...
+Looking for group expand/collapse button...
+Found "Expand group" button. Clicking it...
+Checking for final system messages...
+Found 6 final system message(s):
+- Date: 2026-02-02 01:19, Message: Header - 取引審査結果は必須入力項目です。有効な値を入力してください。/Header - Judgement is mandatory. Please fill in the valid info
+- Date: 2026-02-02 01:19, Message: Header - 最終用途および使用場所が入力されていません。/EndUseDestination is Blank.
+- Date: 2026-02-02 01:19, Message: Header - インフォーム要件該非が入力されていません。/Header - InformRequirementDetermination is Blank.
+- Date: 2026-02-02 01:19, Message: Header - 明らかガイドライン確認結果が入力されていません。審査票に回答し、この項目の結果を更新してください。/Header - GuidelineResult is blank. Please submit the Questionnaire and Update this column result.
+- Date: 2026-02-02 01:19, Message: Header - 需要者チェックリスト確認結果が入力されていません。審査票に回答し、この項目の結果を更新してください。/Header - EndUserCheckResult is blank. Please submit the Questionnaire and Update this column result.
+- Date: 2026-02-02 01:19, Message: Header - 用途チェックリスト確認結果が入力されていません。審査票に回答し、この項目の結果を更新してください。/Header - EndUserCheckResult is blank. Please submit the Questionnaire and Update this column result
+Validation successful: All final system messages are "Header" related.
+  1) [Google Chrome] › tests\E2E_001.test.ts:3:5 › E2E_001: Login and Navigate to GC Search/Reporting Lookup 
+
+    ReferenceError: responseCode is not defined
+
+      1001 |
+      1002 |     // Conditional check for responseCode '01010100'
+    > 1003 |     if (responseCode?.trim() === '01010100') {
+           |     ^
+      1004 |       console.log("Response code is '01010100'. Verifying specific error messages...");
+      1005 |       const requiredKeywords = [
+      1006 |         '取引審査結果',
+        at C:\Users\6135983\OneDrive - Thomson Reuters Incorporated\Customer\三菱商事\E2Etest\tests\E2E_001.test.ts:1003:5
+
+    Error Context: test-results\E2E_001-E2E-001-Login-and--d8b5c--GC-Search-Reporting-Lookup-Google-Chrome\error-context.md
+
+  1 failed
+    [Google Chrome] › tests\E2E_001.test.ts:3:5 › E2E_001: Login and Navigate to GC Search/Reporting Lookup 
