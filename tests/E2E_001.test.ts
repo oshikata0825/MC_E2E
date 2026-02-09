@@ -10,6 +10,51 @@ test('E2E_001: Login and Navigate to GC Search/Reporting Lookup', async ({ page 
     return Math.floor(Math.random() * (max - min + 1)) + min;
   };
 
+  // Pattern B Validation Logic
+  const validatePatternB = (roles: string[], optionals: string[]) => {
+      console.log('--- Validating Pattern B ---');
+      const expectedRoles = [
+          '1-BU Requestor',
+          '2-BU Team Leader',
+          '2-BU Team Leader/Department Manager',
+          '5-GCEO Office',
+          '6-Legal Representative',
+          '7-Legal Director',
+          '8-General Manager'
+      ];
+      const expectedOptionals = ['N', 'Y', 'N', 'N', 'N', 'N', 'N'];
+
+      // Verify length
+      if (roles.length !== expectedRoles.length) {
+          throw new Error(`Pattern B Mismatch: Expected ${expectedRoles.length} roles, found ${roles.length}.`);
+      }
+
+      // Verify content
+      for (let i = 0; i < expectedRoles.length; i++) {
+          // Use Playwright's expect for assertions if possible, or standard checks
+          if (roles[i] !== expectedRoles[i]) {
+               throw new Error(`Pattern B Mismatch at Row ${i+1}: Expected Role "${expectedRoles[i]}", found "${roles[i]}".`);
+          }
+          if (optionals[i] !== expectedOptionals[i]) {
+               throw new Error(`Pattern B Mismatch at Row ${i+1}: Expected IsOptional "${expectedOptionals[i]}", found "${optionals[i]}".`);
+          }
+          console.log(`Verified Row ${i+1}: ${roles[i]} (Optional: ${optionals[i]}) matches Pattern B.`);
+      }
+      console.log('Pattern B Validation Passed.');
+  };
+
+  // Helper function to validate approvers for response code 01010100
+  const validateApproversFor01010100 = (roles: string[], optionals: string[]) => {
+      console.log('--- Validating Approvers for Response Code 01010100 ---');
+      
+      const pattern = 'B';
+      console.log(`Selected Approval Pattern: ${pattern}`);
+      
+      if (pattern === 'B') {
+          validatePatternB(roles, optionals);
+      }
+  };
+
   // Read credentials from account.dat
   const fs = require('fs');
   const path = require('path');
@@ -1326,5 +1371,167 @@ test('E2E_001: Login and Navigate to GC Search/Reporting Lookup', async ({ page 
 } else {
     console.log('No final system messages found. Validation successful!');
 }
+
+  // --- SO Approval Process ---
+  console.log('--- Starting SO Approval Process ---');
+
+  // 1. Click the expander element (Line 1 of elements.txt)
+  const expanderId = '#ctl00_MainContent_tabs_tabExportMessages_rgMessages_ctl00__2__0';
+  console.log(`Looking for expander: ${expanderId}`);
+  const expander = shipmentFrame.locator(expanderId);
+  
+  if (await expander.isVisible()) {
+      const classAttr = await expander.getAttribute('class');
+      // If it is 'rgExpand', we click to expand. If 'rgCollapse', it is already expanded.
+      if (classAttr && classAttr.includes('rgExpand')) {
+           console.log('Expander is collapsed. Clicking to expand...');
+           await expander.click();
+           await shipmentFrame.waitForTimeout(2000); // Wait for expansion
+      } else if (classAttr && classAttr.includes('rgCollapse')) {
+           console.log('Expander is already expanded. Skipping click.');
+      } else {
+           // Fallback if class is ambiguous
+           console.log(`Expander class "${classAttr}" ambiguous. Clicking...`);
+           await expander.click();
+           await shipmentFrame.waitForTimeout(2000);
+      }
+  } else {
+      console.warn(`Expander ${expanderId} not visible. Proceeding to check for link directly.`);
+  }
+
+  // 2. Click the link "SO Approval Screen" (Line 2 of elements.txt)
+  const soApprovalLink = shipmentFrame.locator('a', { hasText: 'SO Approval Screen' });
+  console.log('Looking for "SO Approval Screen" link...');
+  
+  try {
+      await soApprovalLink.waitFor({ state: 'visible', timeout: 5000 });
+  } catch (e) {
+      console.log('Link not immediately visible. Waiting a bit more...');
+  }
+
+  if (await soApprovalLink.isVisible()) {
+      console.log('Found "SO Approval Screen" link. Clicking...');
+      const [soPage] = await Promise.all([
+          page.context().waitForEvent('page'),
+          soApprovalLink.click()
+      ]);
+      await soPage.waitForLoadState('domcontentloaded');
+      console.log(`Navigated to SO Approval Page: ${soPage.url()}`);
+      await soPage.screenshot({ path: 'E2E_001_SO_Approval.png' });
+
+      // --- New Steps: Save and Check Approvers ---
+      console.log('--- interacting with SO Approval Page ---');
+
+      // 1. Find the frame containing the Save button
+      const saveBtnId = 'ctl00_MainContent__SO Approval_ApprovalHeaderpnlDeclaration_save_Button';
+      let soApprovalFrame = null;
+      let saveBtn = null;
+
+      console.log('Searching for Save button in SO Approval frames...');
+      for (let attempt = 1; attempt <= 10; attempt++) {
+          for (const frame of soPage.frames()) {
+              const btn = frame.locator(`[id="${saveBtnId}"]`);
+              if (await btn.count() > 0 && await btn.isVisible()) {
+                  soApprovalFrame = frame;
+                  saveBtn = btn;
+                  console.log(`Found Save button in frame: ${frame.url()}`);
+                  break;
+              }
+          }
+          if (soApprovalFrame) break;
+          await soPage.waitForTimeout(2000);
+      }
+
+      if (!soApprovalFrame || !saveBtn) {
+           console.log('Save button not found. Dumping frames...');
+           soPage.frames().forEach(f => console.log(`Frame: ${f.url()}`));
+           await soPage.screenshot({ path: 'E2E_001_SO_Approval_SaveNotFound.png', fullPage: true });
+           throw new Error('Save button not found on SO Approval page.');
+      }
+
+      console.log('Clicking Save button...');
+      await saveBtn.click();
+      await soPage.waitForLoadState('domcontentloaded');
+      console.log('Save clicked.');
+      
+      // Wait for page to settle after postback
+      await soPage.waitForTimeout(5000);
+
+      // 2. Click Approval Approvers Tab (Line 2 of elements.txt)
+      // Use the found frame
+      const tabId = '__tab_ctl00_MainContent__SO Approval_ApprovalHeaderpnlDeclaration_TabContainer__SO Approval_ApprovalHeaderpnlDeclaration_TabContainer_TabPanel_ApprovalApprovers';
+      const approversTab = soApprovalFrame.locator(`[id="${tabId}"]`);
+      console.log('Clicking Approval Approvers tab...');
+      
+      try {
+        await approversTab.waitFor({ state: 'visible', timeout: 15000 });
+        await approversTab.click();
+        console.log('Approval Approvers tab clicked.');
+      } catch (e) {
+         console.log('Tab click failed. Maybe frame reloaded? Re-acquiring frame...');
+         // Re-acquire frame logic if needed, but usually postback updates the same frame or parent
+         // Let's try finding the tab in all frames again if the original frame reference is stale
+         let tabFound = false;
+         for (const frame of soPage.frames()) {
+             const tab = frame.locator(`[id="${tabId}"]`);
+             if (await tab.isVisible()) {
+                 soApprovalFrame = frame;
+                 await tab.click();
+                 console.log(`Clicked tab in (re-acquired) frame: ${frame.url()}`);
+                 tabFound = true;
+                 break;
+             }
+         }
+         if (!tabFound) throw e;
+      }
+      
+      await soPage.waitForTimeout(3000); // Wait for tab content
+
+      // 3. Extract Values from Columns 5 and 6
+      console.log('Extracting ApproverRole (Col 5) and IsOptional (Col 6)...');
+      
+      // Locate the grid rows inside the tab panel in the correct frame
+      const tabPanelId = tabId.replace('__tab_', '');
+      const tabPanel = soApprovalFrame.locator(`[id="${tabPanelId}"]`);
+      
+      // Rows: .rgRow, .rgAltRow
+      // Ensure we wait for at least one row or the grid to be visible
+      const gridData = tabPanel.locator('.rgMasterTable'); // Telerik grid table class
+      await gridData.waitFor({ state: 'visible', timeout: 10000 }).catch(() => console.log('Grid not immediately visible.'));
+
+      const approverRows = await tabPanel.locator('tr.rgRow, tr.rgAltRow').all();
+      
+      const approverRoles: string[] = [];
+      const isOptionals: string[] = [];
+
+      console.log(`Found ${approverRows.length} approver rows.`);
+
+      for (let i = 0; i < approverRows.length; i++) {
+          const row = approverRows[i];
+          const cells = await row.locator('td').all();
+          
+          if (cells.length > 5) {
+              const role = await cells[4].textContent(); // 5th column
+              const optional = await cells[5].textContent(); // 6th column
+              
+              if (role !== null) approverRoles.push(role.trim());
+              if (optional !== null) isOptionals.push(optional.trim());
+              
+              console.log(`Row ${i+1}: Role="${role?.trim()}", IsOptional="${optional?.trim()}"`);
+          } else {
+              console.warn(`Row ${i+1} has fewer than 6 cells.`);
+          }
+      }
+      
+      console.log('Final Extracted ApproverRoles:', approverRoles);
+            console.log('Final Extracted IsOptionals:', isOptionals);
+            
+            if (responseCode?.trim() === '01010100') {
+                validateApproversFor01010100(approverRoles, isOptionals);
+            }
+      
+        } else {
+      throw new Error('"SO Approval Screen" link not found.');
+  }
 
 });
