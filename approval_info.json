@@ -1,0 +1,22 @@
+{
+  "salesOrderNo": "",
+  "approverRoles": [
+    "1-BU Requestor",
+    "2-BU Team Leader",
+    "2-BU Team Leader/Department Manager",
+    "5-GCEO Office",
+    "6-Legal Representative",
+    "7-Legal Director",
+    "8-General Manager"
+  ],
+  "isOptionals": [
+    "N",
+    "Y",
+    "N",
+    "N",
+    "N",
+    "N",
+    "N"
+  ],
+  "timestamp": "2026-02-12T08:38:07.274Z"
+}
