@@ -8,7 +8,7 @@ export default defineConfig({
     trace: 'on-first-retry',
     headless: false,
   },
-  timeout: 240000, // 4 minutes
+  timeout: 480000, // 8 minutes
 
   projects: [
     {

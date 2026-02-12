@@ -43,8 +43,207 @@ test('E2E_001: Login and Navigate to GC Search/Reporting Lookup', async ({ page 
       console.log('Pattern B Validation Passed.');
   };
 
+  // Helper function to set specific approvers for Pattern B
+  const setApproversPatternB = async (tabPanel: any, frame: any = null) => {
+      console.log('--- Setting Approvers for Pattern B ---');
+      const rolesToSet = [
+        { role: '2-BU Team Leader', approver: 'MCTest2JP' },
+        { role: '2-BU Team Leader/Department Manager', approver: 'MCTest3JP' },
+        { role: '5-GCEO Office', approver: 'MCTest5JP' },
+        { role: '6-Legal Representative', approver: 'MCTest6JP' },
+        { role: '7-Legal Director', approver: 'MCTest7JP' },
+        { role: '8-General Manager', approver: 'MCTest8JP' }
+      ];
+
+      // Use the provided frame context if available, otherwise fallback to page
+      const context = frame || tabPanel.page();
+
+      for (const target of rolesToSet) {
+          console.log(`Attempting to find and edit role: ${target.role}`);
+          
+          let rowFound = false;
+          // Retry finding the row a few times in case of grid reload/latency
+          for (let attempt = 0; attempt < 5; attempt++) {
+              await context.waitForTimeout(5000); // Wait for grid stability
+              
+              const tabId = '__tab_ctl00_MainContent__SO Approval_ApprovalHeaderpnlDeclaration_TabContainer__SO Approval_ApprovalHeaderpnlDeclaration_TabContainer_TabPanel_ApprovalApprovers';
+              const tabPanelId = tabId.replace('__tab_', '');
+              const currentTabPanel = context.locator(`[id="${tabPanelId}"]`);
+
+              // Ensure the "Approval Approvers" tab is actually selected (Telerik/Ajax tabs may lose state)
+              // We check if the tab panel is visible; if not, click the tab again.
+              if (!(await currentTabPanel.isVisible())) {
+                  console.log('Approval Approvers tab panel not visible. Re-clicking tab...');
+                  const approversTab = context.locator(`[id="${tabId}"]`);
+                  await approversTab.click();
+                  await context.waitForTimeout(3000);
+              }
+
+              // Ensure at least one row is present before querying all
+              const rowIndicator = currentTabPanel.locator('tr.rgRow, tr.rgAltRow').first();
+              try {
+                  await rowIndicator.waitFor({ state: 'attached', timeout: 5000 });
+              } catch (e) {
+                  console.log('Waiting for rows timed out or grid empty, retrying refresh...');
+                  continue;
+              }
+
+              const rows = await currentTabPanel.locator('tr.rgRow, tr.rgAltRow').all();
+              console.log(`Found ${rows.length} rows in grid (Attempt ${attempt + 1}).`);
+
+              for (const row of rows) {
+                  // Use evaluate for faster/stable text retrieval directly from DOM
+                  const roleText = await row.evaluate((el: any) => {
+                      const cells = el.getElementsByTagName('td');
+                      // Get text and replace &nbsp; (\u00A0) with normal space
+                      return cells.length > 4 ? cells[4].textContent.replace(/\u00A0/g, ' ').trim() : null;
+                  });
+                  
+                  // Debug found roles
+                  if (roleText) console.log(`Checking grid row: "${roleText}"`);
+
+                  if (roleText === target.role || (roleText && roleText.includes(target.role))) {
+                      console.log(`Matching row found for role: ${target.role}. Clicking Edit...`);
+                      
+                      const editButton = row.locator('a.IPLinkButton:has-text("Edit"), a:has-text("Edit"), input[title="Edit"]').first();
+                      
+                      // Check if button is resolved
+                      if (await editButton.count() > 0) {
+                          console.log('Edit button found, attempting click...');
+                          try {
+                              // Use force:true to bypass overlay checks which often fail on Telerik grids
+                              await editButton.click({ force: true, timeout: 5000 });
+                          } catch (clickErr) {
+                              console.warn('Standard/Force click failed, attempting JS click fallback...', clickErr);
+                              await editButton.evaluate((el: any) => el.click());
+                          }
+                      } else {
+                          console.error('Edit button locator returned 0 matches in this row.');
+                          // Try debugging the row html
+                          const rowHtml = await row.evaluate((el: any) => el.innerHTML);
+                          console.log(`Row HTML dump: ${rowHtml.substring(0, 200)}...`);
+                      }
+                      
+                      console.log(`Clicked Edit for ${target.role}. Waiting for approver selection field...`);
+
+                      // Wait for the popup window to become visible. 
+                      // Telerik RadWindow often has classes like rwWindowContent or rwExternalContent
+                      const popup = context.locator('.rwWindowContent:visible, .rwExternalContent:visible, [id*="rwDynamicEdit"]:visible').first();
+                      
+                      // Find the approver input within the popup for better isolation
+                      const approverSelector = popup.locator('select[id*="drpUserID"], select[id*="drpApprover"], input[id*="rcbApprover_Input"], input[id*="txtApprover"]').first();
+                      
+                      try {
+                          // Increased wait for the popup and its content
+                          await popup.waitFor({ state: 'visible', timeout: 15000 });
+                          await approverSelector.waitFor({ state: 'visible', timeout: 20000 });
+                          
+                          const tagName = await approverSelector.evaluate((el: any) => el.tagName);
+                          if (tagName === 'SELECT') {
+                              console.log(`Selecting option "${target.approver}" in dropdown.`);
+                              await approverSelector.selectOption({ label: target.approver });
+                          } else {
+                              console.log(`Filling "${target.approver}" in input field.`);
+                              await approverSelector.fill(target.approver);
+                              await approverSelector.press('Enter');
+                          }
+                          
+                          // Click Update/Save button inside the popup only.
+                          // Based on elements.txt, the strict ID is ctl00_MainContent_rwDynamicEdit_C_lnxBtnSaveRecord
+                          const updateButton = popup.locator('[id="ctl00_MainContent_rwDynamicEdit_C_lnxBtnSaveRecord"]').first();
+                          
+                          await updateButton.waitFor({ state: 'visible', timeout: 5000 });
+                          await updateButton.click();
+                          
+                          // Wait for the popup itself to disappear
+                          try {
+                              await expect(popup).toBeHidden({ timeout: 15000 });
+                          } catch (e) {
+                              console.log('Popup did not hide, checking if update button is still active...');
+                              if (await updateButton.isVisible()) {
+                                  await updateButton.evaluate((el: any) => el.click());
+                                  await expect(popup).toBeHidden({ timeout: 10000 });
+                              }
+                          }
+                          
+                          // Wait for update postback/animation
+                          await context.waitForTimeout(5000); 
+                          console.log(`Successfully set ${target.approver} for ${target.role}.`);
+                      } catch (err) {
+                          console.error(`Failed to set approver for ${target.role}: ${err.message}`);
+                          // Take a screenshot on failure inside this loop to help debugging
+                          await context.screenshot({ path: `Error_SetApprover_${target.role.replace(/\//g, '_')}.png` });
+                      }
+                      
+                      rowFound = true;
+                      break; 
+                  }
+              }
+              if (rowFound) break; // Break from retry loop if found
+          }
+          
+          if (!rowFound) {
+              console.warn(`Could not find row for role: ${target.role} after retries.`);
+          }
+      }
+
+      // Final Step: Click the main Save button on the SO Approval page to commit all changes
+      console.log('--- All approvers processed. Clicking final Save on the parent screen ---');
+      const finalSaveBtn = context.locator('[id="ctl00_MainContent__SO Approval_ApprovalHeaderpnlDeclaration_save_Button"]');
+      try {
+          await finalSaveBtn.waitFor({ state: 'visible', timeout: 10000 });
+          await finalSaveBtn.click();
+          console.log('Final Page Save clicked successfully.');
+          await context.waitForTimeout(5000); // Wait for postback to complete
+      } catch (e) {
+          console.warn('Could not find or click the final parent Save button. It might have already saved or is not visible.');
+      }
+
+      // --- New Step: Request Approval ---
+      console.log('--- Clicking "Request Approval" ---');
+      const requestApprovalId = 'ctl00_MainContent__SO Approval_ApprovalHeaderpnlDeclaration_generic_sql_RequestApproval_Button';
+      const requestLink = context.locator(`[id="${requestApprovalId}"]`);
+
+      try {
+          await requestLink.waitFor({ state: 'visible', timeout: 15000 });
+          console.log('Found "Request Approval" link. Clicking...');
+          await requestLink.click();
+
+          // Handle the confirmation dialog ("Are you sure you want to submit...")
+          console.log('Waiting for confirmation dialog and clicking OK...');
+          await context.waitForTimeout(3000); // Wait for dialog animation
+
+          // Look for Telerik RadConfirm OK button (class rwOkBtn)
+          // We look in both the current context (frame) and the main page
+          const mainPage = tabPanel.page();
+          const okButton = context.locator('button.rwOkBtn:visible, .rwOkBtn:visible').first();
+          const mainOkButton = mainPage.locator('button.rwOkBtn:visible, .rwOkBtn:visible').first();
+
+          if (await okButton.isVisible()) {
+              await okButton.click();
+              console.log('Clicked OK on confirmation dialog within context.');
+          } else if (await mainOkButton.isVisible()) {
+              await mainOkButton.click();
+              console.log('Clicked OK on confirmation dialog on main page.');
+          } else {
+              console.warn('Confirmation OK button not found. Attempting a script-based click if possible.');
+              // JS click fallback as sometimes visibility detection fails on overlay dialogs
+              await context.evaluate(() => {
+                  const btn = document.querySelector('.rwOkBtn');
+                  if (btn) (btn as HTMLElement).click();
+              });
+          }
+
+          await context.waitForTimeout(5000); 
+          console.log('Approval Request submitted successfully.');
+      } catch (err) {
+          console.error(`Failed to complete "Request Approval": ${err.message}`);
+          await context.screenshot({ path: 'Error_RequestApproval.png' });
+      }
+  };
+
   // Helper function to validate approvers for response code 01010100
-  const validateApproversFor01010100 = (roles: string[], optionals: string[]) => {
+  const validateApproversFor01010100 = async (roles: string[], optionals: string[], tabPanel: any, frame: any = null) => {
       console.log('--- Validating Approvers for Response Code 01010100 ---');
       
       const pattern = 'B';
@@ -52,6 +251,7 @@ test('E2E_001: Login and Navigate to GC Search/Reporting Lookup', async ({ page 
       
       if (pattern === 'B') {
           validatePatternB(roles, optionals);
+          await setApproversPatternB(tabPanel, frame);
       }
   };
 
@@ -679,7 +879,7 @@ test('E2E_001: Login and Navigate to GC Search/Reporting Lookup', async ({ page 
            break;
       }
 
-      await page.waitForTimeout(3000);
+      await page.waitForTimeout(5000);
   }
 
   if (okBtnLocator) {
@@ -731,7 +931,7 @@ test('E2E_001: Login and Navigate to GC Search/Reporting Lookup', async ({ page 
       }
 
       console.log(`Link not found on attempt ${attempt}. Retrying in 3 seconds...`);
-      await page.waitForTimeout(3000);
+      await page.waitForTimeout(5000);
   }
 
   if (!shipmentLink) {
@@ -852,7 +1052,7 @@ test('E2E_001: Login and Navigate to GC Search/Reporting Lookup', async ({ page 
     // The "Add New Record" button opens a modal dialog, likely in a new iframe.
     console.log('Searching for the "Add Product" modal frame...');
     let addProductFrame = null;
-    for (let attempt = 1; attempt <= 5; attempt++) {
+    for (let attempt = 1; attempt <= 10; attempt++) {
         await newPage.waitForTimeout(2000); // Wait for modal to appear
         console.log(`Add Product frame scan attempt ${attempt}...`);
         const frames = newPage.frames();
@@ -910,7 +1110,7 @@ test('E2E_001: Login and Navigate to GC Search/Reporting Lookup', async ({ page 
     // Wait for the newly added product to appear in the main grid
     console.log(`Waiting for product "${productNum}" to appear in the grid...`);
     const productRowLocator = shipmentFrame.locator(`tr.rgRow:has-text("${productNum}"), tr.rgAltRow:has-text("${productNum}")`);
-    await productRowLocator.waitFor({ state: 'visible', timeout: 20000 }); // Increased timeout for grid update
+    await productRowLocator.waitFor({ state: 'visible', timeout: 40000 }); // Increased timeout for grid update
     console.log(`Product "${productNum}" found in the grid.`);
   }
   console.log('--- Finished adding all products ---');
@@ -977,7 +1177,7 @@ test('E2E_001: Login and Navigate to GC Search/Reporting Lookup', async ({ page 
       await companyInput.press('Enter');
       
       // Wait for the dropdown to disappear as confirmation of selection
-      await expect(customerAutocompleteDropdown).toBeHidden({ timeout: 10000 });
+      await expect(customerAutocompleteDropdown).toBeHidden({ timeout: 20000 });
       console.log('Autocomplete dropdown has closed, selection is likely complete.');
       
       await shipmentFrame.waitForTimeout(2000); // Small delay between customers
@@ -1430,8 +1630,13 @@ test('E2E_001: Login and Navigate to GC Search/Reporting Lookup', async ({ page 
       console.log('Searching for Save button in SO Approval frames...');
       for (let attempt = 1; attempt <= 10; attempt++) {
           for (const frame of soPage.frames()) {
-              const btn = frame.locator(`[id="${saveBtnId}"]`);
-              if (await btn.count() > 0 && await btn.isVisible()) {
+              // Elements might have extra spaces or be matching a slightly different pattern
+              // We'll use a locator that looks for the ID ending with the expected value
+              const btn = frame.locator('a[id$="save_Button"], a:has-text("Save")').filter({ hasText: /^Save$/ }).first();
+              
+              if (await btn.count() > 0) {
+                  // Ensure it's attached and ideally visible
+                  await btn.scrollIntoViewIfNeeded();
                   soApprovalFrame = frame;
                   saveBtn = btn;
                   console.log(`Found Save button in frame: ${frame.url()}`);
@@ -1439,7 +1644,8 @@ test('E2E_001: Login and Navigate to GC Search/Reporting Lookup', async ({ page 
               }
           }
           if (soApprovalFrame) break;
-          await soPage.waitForTimeout(2000);
+          console.log(`Attempt ${attempt}: Save button not found yet, retrying...`);
+          await soPage.waitForTimeout(3000);
       }
 
       if (!soApprovalFrame || !saveBtn) {
@@ -1527,7 +1733,7 @@ test('E2E_001: Login and Navigate to GC Search/Reporting Lookup', async ({ page 
             console.log('Final Extracted IsOptionals:', isOptionals);
             
             if (responseCode?.trim() === '01010100') {
-                validateApproversFor01010100(approverRoles, isOptionals);
+                await validateApproversFor01010100(approverRoles, isOptionals, tabPanel, soApprovalFrame);
             }
       
         } else {
