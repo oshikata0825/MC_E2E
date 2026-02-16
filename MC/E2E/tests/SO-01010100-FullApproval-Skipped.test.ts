@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
 
-test('E2E_001: Login and Navigate to GC Search/Reporting Lookup', async ({ page }) => {
+test('Response01010100-FullApproval-NotSkipped', async ({ page }) => {
   let responseCode: string | null = null;
   let salesOrderNo = '';
   const allMessages: string[] = [];
@@ -59,8 +59,8 @@ test('E2E_001: Login and Navigate to GC Search/Reporting Lookup', async ({ page 
   const setApproversPatternB = async (tabPanel: any, frame: any = null) => {
       console.log('--- Setting Approvers for Pattern B ---');
       const rolesToSet = [
-        { role: '2-BU Team Leader', approver: 'MCTest2JP' },
-        { role: '2-BU Team Leader/Department Manager', approver: 'MCTest3JP' },
+        // { role: '2-BU Team Leader', approver: 'MCTest2JP' }, // Skipped because IsOptional is Y
+        { role: '2-BU Team Leader/Department Manager', approver: 'MCTest2JP' },
         { role: '5-GCEO Office', approver: 'MCTest5JP' },
         { role: '6-Legal Representative', approver: 'MCTest6JP' },
         { role: '7-Legal Director', approver: 'MCTest7JP' },
@@ -268,7 +268,7 @@ test('E2E_001: Login and Navigate to GC Search/Reporting Lookup', async ({ page 
   };
 
   // Read credentials from account.dat
-  const accountsData = fs.readFileSync(path.resolve(__dirname, '../account.dat'), 'utf-8');
+  const accountsData = fs.readFileSync(path.resolve(__dirname, '../../../account.dat'), 'utf-8');
   const accounts = JSON.parse(accountsData);
   const user = accounts.find((acc: any) => acc.id === 'MCTest1');
 
@@ -457,6 +457,7 @@ test('E2E_001: Login and Navigate to GC Search/Reporting Lookup', async ({ page 
 
   // Column indices
   const companyIdIndex = 3;
+  const dtsStatusIndex = 9; // Temporary Index for DTS Status
   const internalJudgementIndex = 10;
   
   const extractedCompanyIds: string[] = [];
@@ -473,20 +474,26 @@ test('E2E_001: Login and Navigate to GC Search/Reporting Lookup', async ({ page 
       
       if (cells.length > internalJudgementIndex) {
           let internalJudgement = await cells[internalJudgementIndex].textContent();
+          let dtsStatus = await cells[dtsStatusIndex].textContent(); // NEW: Get DTS Status
           
-          if (internalJudgement) {
+          if (internalJudgement && dtsStatus) {
               // Normalize whitespace: replace non-breaking space with normal space and trim
               const cleanedJudgement = internalJudgement.replace(/\u00A0/g, ' ').trim();
+              const cleanedDtsStatus = dtsStatus.replace(/\u00A0/g, ' ').trim(); // NEW: Clean DTS Status
               
               // Debug log to see what we are checking (limiting length to avoid spam)
-              // console.log(`Row check: InternalJudgement="${cleanedJudgement}"`);
+              // console.log(`Row check: InternalJudgement="${cleanedJudgement}", DTSStatus="${cleanedDtsStatus}"`);
 
-              if (cleanedJudgement.length > 0) {
+              // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+              // TEMPORARY CONDITION: Internal Judgement is not empty AND DTS Status is "Clear"
+              // TODO: REMOVE THIS DTS Status condition later
+              // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+              if (cleanedJudgement.length > 0 && cleanedDtsStatus === 'Clear') {
                   const companyId = await cells[companyIdIndex].textContent();
                   if (companyId) {
                       const id = companyId.trim();
                       extractedCompanyIds.push(id);
-                      console.log(`Found match: CompanyID=${id}, InternalJudgement="${cleanedJudgement}"`);
+                      console.log(`Found match: CompanyID=${id}, InternalJudgement="${cleanedJudgement}", DTSStatus="${cleanedDtsStatus}"`);
                   }
               }
           }
@@ -1011,7 +1018,7 @@ test('E2E_001: Login and Navigate to GC Search/Reporting Lookup', async ({ page 
               salesOrderNo: salesOrderNo,
               timestamp: new Date().toISOString()
           };
-          const infoPath = path.resolve(__dirname, '../approval_info.json');
+          const infoPath = path.resolve(__dirname, '../../../approval_info.json');
           fs.writeFileSync(infoPath, JSON.stringify(preliminaryInfo, null, 2));
       }
   } catch (e) {
@@ -1345,8 +1352,8 @@ test('E2E_001: Login and Navigate to GC Search/Reporting Lookup', async ({ page 
         // --- 未入力項目の修正処理 ---
         const needsCorrection = hasTransactionHold || hasInformRequirements || hasEndUse || hasUsageCheck || hasEndUserCheck || hasGuidelineCheck;
         
-        if (needsCorrection) {
-            console.log('未入力項目を検出しました。Headerタブへ移動して修正します...');
+        if (needsCorrection || true) { // Always enter here to check/set ProvisionalApproval
+            console.log('未入力項目、または仮承認要請フラグの設定が必要なため、Headerタブへ移動します');
             // Headerタブへ移動 (共通処理)
             const headerTab = shipmentFrame.locator('#__tab_tabExportHeader');
             await headerTab.waitFor({ state: 'visible', timeout: 10000 });
@@ -1519,11 +1526,39 @@ test('E2E_001: Login and Navigate to GC Search/Reporting Lookup', async ({ page 
             }
         }
         
+        // 7. 仮承認要請フラグの入力 (常に確認して設定)
+        console.log('「仮承認要請フラグ」の確認と設定を開始します...');
+        const provApprovalContainer = shipmentFrame.locator('#s2id_drpProvisionalApprovalRequestFlag_TTM');
+        if (await provApprovalContainer.isVisible()) {
+            const provApprovalDropdown = provApprovalContainer.locator('.select2-choice');
+            const currentVal = await provApprovalDropdown.locator('.select2-chosen').textContent();
+            
+            if (currentVal?.trim() !== 'N-いいえ') {
+                await provApprovalDropdown.click();
+                console.log('仮承認要請フラグドロップダウンをクリックしました。');
+
+                const optionText = 'N-いいえ';
+                const optionToSelect = shipmentFrame.locator('div.select2-drop ul.select2-results li').filter({ hasText: optionText }).first();
+                await optionToSelect.waitFor({ state: 'visible', timeout: 5000 });
+
+                if (await optionToSelect.isVisible()) {
+                    await optionToSelect.click();
+                    console.log(`選択肢 "${optionText}" を選択しました。`);
+                    await expect(provApprovalDropdown.locator('.select2-chosen')).toHaveText(optionText, { timeout: 5000 });
+                } else {
+                    console.warn(`仮承認要請フラグドロップダウンに選択肢 "${optionText}" が見つかりませんでした。`);
+                }
+            } else {
+                console.log('仮承認要請フラグは既に「N-いいえ」に設定されています。');
+            }
+        } else {
+            console.warn('仮承認要請フラグドロップダウンが見つかりません (#s2id_drpProvisionalApprovalRequestFlag_TTM)。');
+        }
                 
         
-        // 7. まとめて保存と検証
-        if (needsCorrection) {
-            console.log('--- 修正完了後、再度保存して検証します ---');
+        // 8. まとめて保存と検証
+        if (needsCorrection || true) {
+            console.log('--- 保存して検証を開始します ---');
             const saveButton = shipmentFrame.locator('#ctl00_MainContent_lnxbtnSaveAndValidate');
             await saveButton.click();
             console.log('「保存と検証」ボタンをクリックしました。');
@@ -1715,12 +1750,14 @@ test('E2E_001: Login and Navigate to GC Search/Reporting Lookup', async ({ page 
           
           if (cells.length > 5) {
               const role = await cells[4].textContent(); // 5th column
-              const optional = await cells[5].textContent(); // 6th column
+              const optional = await cells[5].textContent() || ''; // 6th column
               
-              if (role !== null) approverRoles.push(role.trim());
-              if (optional !== null) isOptionals.push(optional.trim());
-              
-              console.log(`Row ${i+1}: Role="${role?.trim()}", IsOptional="${optional?.trim()}"`);
+              const trimmedRole = role?.trim();
+              const trimmedOptional = optional?.trim();
+
+              if (trimmedRole) approverRoles.push(trimmedRole);
+              isOptionals.push(trimmedOptional);
+              console.log(`Row ${i+1}: Role="${trimmedRole}", IsOptional="${trimmedOptional}"`);
           } else {
               console.warn(`Row ${i+1} has fewer than 6 cells.`);
           }
@@ -1798,7 +1835,7 @@ test('E2E_001: Login and Navigate to GC Search/Reporting Lookup', async ({ page 
           timestamp: new Date().toISOString()
       };
       
-      const infoPath = path.resolve(__dirname, '../approval_info.json');
+      const infoPath = path.resolve(__dirname, '../../../approval_info.json');
       fs.writeFileSync(infoPath, JSON.stringify(approvalInfo, null, 2));
       console.log(`Saved approval info to ${infoPath}`);
 

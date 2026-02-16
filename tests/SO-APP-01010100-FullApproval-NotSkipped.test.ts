@@ -5,10 +5,10 @@ import * as path from 'path';
 /**
  * Sales Order Approval Chain Test
  * This test handles the sequential approval of a Sales Order by multiple users.
- * It reads the Sales Order Number from approval_info.json created by E2E_001.test.ts.
+ * It reads the Sales Order Number from approval_info.json created by SO-01010100-FullApproval-NotSkipped.test.ts.
  */
 
-test('Sales Order Approval Chain', async ({ page }) => {
+test('Response01010100-FullApproval-NotSkipped', async ({ page }) => {
   console.log(`--- Test Started at ${new Date().toISOString()} ---`);
   test.setTimeout(600000); // 10 minutes
   const accountsData = fs.readFileSync(path.resolve(__dirname, '../account.dat'), 'utf-8');

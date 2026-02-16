@@ -1,0 +1,83 @@
+Running 1 test using 1 worker
+[1/1] [Google Chrome] › tests\MC_DPS_Upload_010.test.ts:18:9 › Role Based Access Control - Spreadsheet Upload Visibility › Verify 
+[Google Chrome] › tests\MC_DPS_Upload_010.test.ts:18:9 › Role Based Access Control - Spreadsheet Upload Visibility › Verify Spreadsheet Upload Visibility for TOshikata
+--- テスト開始: TOshikata ---
+✅ Spreadsheet Upload をクリックしました
+✅ TOshikata: 130840 SpreadSheet upload - DPS が表示されています (期待通り)
+--- TOshikata: "Upload" リンクのクリック処理を開始 ---
+✅ TOshikata: "Upload" ポップアップ画面が開きました
+ℹ️ 画面の読み込み完了を待機しています (#lbxPageName)...
+✅ 画面の読み込みを確認しました (フレーム: "legacy-outlet")
+ℹ️ ポップアップ内の全フレームを走査してリンクを探します...
+ℹ️ フレーム数: 3
+   - フレーム名: "", URL: https://ogt-gtm-web-eu-imp.7166.aws.thomsonreuters...
+   - フレーム名: "legacy-bridge", URL: https://ogt-gtm-web-eu-imp.7166.aws.thomsonreuters...
+   - フレーム名: "legacy-outlet", URL: https://ogt-gtm-web-eu-imp.7166.aws.thomsonreuters...
+ℹ️ フレーム "legacy-outlet" 内にリンクを発見しました。
+--- TOshikata: "Download Excel Template" をクリックします ---
+✅ TOshikata: テンプレートをダウンロードしました: C:\Users\6135983\OneDrive - Thomson Reuters Incorporated\Customer\三菱商事\UnitTestCode\tests\template_TOshikata.xlsx
+ℹ️ TOshikata: 3行のデータを入力します。
+   - 行 2: A: 130840, B: For-SIT-Avcijvnjr, F: Company-For-SIT-H0Bzb0ZsN, G: US
+   - 行 3: A: 130840, B: For-SIT-2jBmXfMPE, F: Company-For-SIT-pmKsoHKg9, G: GB
+   - 行 4: A: 130840, B: For-SIT-IkuSVMrmB, F: Company-For-SIT-xLZ4aLqUD, G: GB
+✅ TOshikata: エクセルを編集・保存しました。合計3行追加。
+--- [エクセル追加データ詳細] ---
+行 2: A=130840, B=For-SIT-Avcijvnjr, F=Company-For-SIT-H0Bzb0ZsN, G=US, Q=Y, U=Y
+行 3: A=130840, B=For-SIT-2jBmXfMPE, F=Company-For-SIT-pmKsoHKg9, G=GB, Q=Y, U=Y
+行 4: A=130840, B=For-SIT-IkuSVMrmB, F=Company-For-SIT-xLZ4aLqUD, G=GB, Q=Y, U=Y
+-------------------------------
+--- TOshikata: エクセルファイルのアップロードを開始します ---
+✅ Choose File ボタンをフレーム "legacy-outlet" 内に見つけました。
+✅ TOshikata: ファイルを選択しました: C:\Users\6135983\OneDrive - Thomson Reuters Incorporated\Customer\三菱商事\UnitTestCode\tests\template_TOshikata.xlsx
+✅ Upload and Import Data ボタンをフレーム "legacy-outlet" 内に見つけました。
+ℹ️ アップロード前の状態: レコードあり (時刻: 2026-01-26 17:57)
+--- TOshikata: Upload and Import Data をクリックします (2026/1/27 10:00:53) ---
+ℹ️ 5秒間待機してから Refresh をチェックします...
+✅ Refresh ボタンをフレーム "legacy-outlet" 内に見つけました。
+--- TOshikata: Refresh をクリックします (試行 1/21) ---
+ℹ️ まだ新しいレコードが表示されていません。
+ℹ️ 5秒待機してリトライします...
+--- TOshikata: Refresh をクリックします (試行 2/21) ---
+ℹ️ 最新レコードを確認: 時刻=2026-01-27 10:01, ステータス=Running
+ℹ️ 処理ステータスは "Running" です。完了まで待機します...
+ℹ️ 5秒待機してリトライします...
+--- TOshikata: Refresh をクリックします (試行 3/21) ---
+ℹ️ 最新レコードを確認: 時刻=2026-01-27 10:01, ステータス=Running
+ℹ️ 処理ステータスは "Running" です。完了まで待機します...
+ℹ️ 5秒待機してリトライします...
+--- TOshikata: Refresh をクリックします (試行 4/21) ---
+ℹ️ 最新レコードを確認: 時刻=2026-01-27 10:01, ステータス=Complete
+✅ アップロード処理が正常に完了しました。
+--- TOshikata: DPS Search/Reporting Lookup への遷移を確認します ---
+✅ DPS メニューをクリックしました
+✅ DPS Search/Reporting Lookup をクリックしました
+✅ MC Company Lookup をクリックしました
+--- TOshikata: 会社名 "Company-For-SIT-H0Bzb0ZsN" でフィルタリングを開始します ---
+ℹ️ フィルタオプションメニューを開きました。
+ℹ️ フィルタオペレータを "EqualTo" に設定しました。
+ℹ️ フィルタ適用を待機しています (Company-For-SIT-H0Bzb0ZsN)...
+✅ Company-For-SIT-H0Bzb0ZsN の確認が完了しました。
+--- TOshikata: 会社名 "Company-For-SIT-pmKsoHKg9" でフィルタリングを開始します ---
+ℹ️ フィルタオプションメニューを開きました。
+ℹ️ フィルタオペレータは既に "EqualTo" です。
+ℹ️ フィルタ適用を待機しています (Company-For-SIT-pmKsoHKg9)...
+✅ Company-For-SIT-pmKsoHKg9 の確認が完了しました。
+--- TOshikata: 会社名 "Company-For-SIT-xLZ4aLqUD" でフィルタリングを開始します ---
+ℹ️ フィルタオプションメニューを開きました。
+ℹ️ フィルタオペレータは既に "EqualTo" です。
+ℹ️ フィルタ適用を待機しています (Company-For-SIT-xLZ4aLqUD)...
+✅ Company-For-SIT-xLZ4aLqUD の確認が完了しました。
+✅ TOshikata: すべての会社名のフィルタリング確認が完了しました。
+Logout failed, but test might have already succeeded.
+  1) [Google Chrome] › tests\MC_DPS_Upload_010.test.ts:18:9 › Role Based Access Control - Spreadsheet Upload Visibility › Verify Spreadsheet Upload Visibility for TOshikata 
+
+    Test timeout of 180000ms exceeded.
+
+    attachment #5: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\MC_DPS_Upload_010-Role-Bas-1a9ad-ad-Visibility-for-TOshikata-Google-Chrome\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\MC_DPS_Upload_010-Role-Bas-1a9ad-ad-Visibility-for-TOshikata-Google-Chrome\error-context.md
+
+  1 failed
+    [Google Chrome] › tests\MC_DPS_Upload_010.test.ts:18:9 › Role Based Access Control - Spreadsheet Upload Visibility › Verify Spreadsheet Upload Visibility for TOshikata

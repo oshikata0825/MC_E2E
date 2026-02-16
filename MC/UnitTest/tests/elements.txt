@@ -1,0 +1,2 @@
+<span _ngcontent-ng-c4163861872=""> Tomohiro Oshikata <i _ngcontent-ng-c4163861872="" class="bento-icon-caret-down-filled ogt-caret"></i></span>
+<button _ngcontent-ng-c1957935546="" type="button" id="logoutButton" class="btn btn-primary"><i _ngcontent-ng-c1957935546="" class="bento-icon-exit2"></i><span _ngcontent-ng-c1957935546="">Sign out</span></button>
